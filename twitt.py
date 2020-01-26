@@ -7,12 +7,14 @@
 import os
 import argparse
 import configparser
+import datetime as date
 import re
 import itertools
 import collections
 
 import tweepy as tw
 import pandas as pd
+
 
 def clean_tweet(txt):
     """
@@ -35,7 +37,8 @@ def get_tweets(args, cfg):
     api = tw.API(auth, wait_on_rate_limit=True)
 
     search_words = "#metal"
-    date_since = "2020-01-17"
+    date_since = date.date.today() - date.timedelta(days=args.days)
+    date_since = date_since.strftime("%Y-%m-%d")
 
     # Collect tweets
     tweets = tw.Cursor(api.search, q=search_words, lang="en",
@@ -61,6 +64,12 @@ def parseargs():
                         type=str,
                         default='twitter.cfg',
                         help='twitter configuration')
+    parser.add_argument('-d',
+                        '--days',
+                        dest='days',
+                        type=int,
+                        default=7,
+                        help='days since twits')
     args = parser.parse_args()
     return args
 
@@ -76,6 +85,7 @@ def main():
     # Beware tweet.text is a kind of generator. You cannot call it twice.
     tws = [clean_tweet(tweet.text) for tweet in tweets]
     print(tws)
+
 
 if __name__ == "__main__":
     # execute only if run as a script
